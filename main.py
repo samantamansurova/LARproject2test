@@ -1,16 +1,51 @@
-# This is a sample Python script.
+import os
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+import selenium as selenium
+import selenium.webdriver
+import re
+from selenium.webdriver.chrome.service import Service
+import selenium.common
+import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
+from icalendar import Calendar, Event
 
+import datetime
+import locale
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+driver = webdriver.Chrome()
+driver.get("https://nodarbibas.rtu.lv/")
+##time.sleep(600)
 
+##/html/body/div[2]/div/div[1]/div/div/div/div[2]/div/button/div/div/div
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+darbiba1= driver.find_element(By.XPATH, '/html/body/div[2]/div/div[1]/div/div/div/div[2]/div/button/div/div/div')
+darbiba1.click()
+time.sleep(1)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+##/html/body/div[2]/div/div[1]/div/div/div/div[2]/div/div/div[2]/ul/li[11]/a
+
+darbiba2= driver.find_element(By.XPATH, '/html/body/div[2]/div/div[1]/div/div/div/div[2]/div/div/div[2]/ul/li[11]/a')
+darbiba2.click()
+time.sleep(1)
+
+##/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[1]/select/option[2]
+
+darbiba3= driver.find_element(By.XPATH, '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[1]/select/option[2]')
+darbiba3.click()
+time.sleep(1)
+
+##/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[3]
+
+darbiba4= driver.find_element(By.XPATH, '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[3]')
+darbiba4.click()
+time.sleep(1)
+
+##/html/body/div[2]/div/div[2]/div/div/div[1]/div[2]/div[1]/div[3]/div/button[1]/span
+
+darbiba5= driver.find_element(By.XPATH, '/html/body/div[2]/div/div[2]/div/div/div[1]/div[2]/div[1]/div[3]/div/button[1]/span')
+click_count= 4
+for i in range(click_count):
+    darbiba5.click()
+time.sleep(500)
