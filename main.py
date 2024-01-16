@@ -48,4 +48,40 @@ darbiba5= driver.find_element(By.XPATH, '/html/body/div[2]/div/div[2]/div/div/di
 click_count= 4
 for i in range(click_count):
     darbiba5.click()
-time.sleep(500)
+time.sleep(3)
+
+
+def get_events():
+    events = []
+
+    try:
+
+        day_events_elements = driver.find_elements(By.CLASS_NAME, 'fc-daygrid-day-events')
+
+        for day_element in day_events_elements:
+
+            event_harness_elements = day_element.find_elements(By.CLASS_NAME, 'fc-daygrid-event-harness')
+
+            if event_harness_elements:
+                for event_harness_element in event_harness_elements:
+                    date = day_element.find_element(By.XPATH, '../..//a').get_attribute('aria-label')
+                    title = event_harness_element.find_element(By.CLASS_NAME, 'fc-event-title').text
+                    time = event_harness_element.find_element(By.CLASS_NAME, 'fc-event-time').text
+
+                    events.append({
+                        'date': date,
+                        'title': title,
+                        'time': time
+                    })
+
+    finally:
+
+        driver.quit()
+
+    return events
+
+
+events = get_events()
+
+for event in events:
+    print(event)
