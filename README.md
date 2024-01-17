@@ -2,6 +2,8 @@
 
 Samanta Mansurova 231RDB274
 
+Programmas demonstrācija redzama [šeit](https://www.youtube.com/watch?v=09lz7vluhUk&ab_channel=samantam).
+
 ## Darba apraksts
 
 ### Tēmas pamatojums
