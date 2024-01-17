@@ -1,88 +1,61 @@
 import os
-
-import selenium as selenium
-import selenium.webdriver
 import re
-from selenium.webdriver.chrome.service import Service
-import selenium.common
 import time
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
-from icalendar import Calendar, Event
-import tkinter as tk
-from tkinter import OptionMenu, Button
-
 import datetime
-import locale
+import tkinter as tk
+from tkinter import OptionMenu, Button, ttk
+from selenium.webdriver.common.by import By
+from icalendar import Calendar, Event
 from selenium.webdriver.chrome.options import Options
+from selenium import webdriver
+
+
+def open_file_explorer():
+    directory = os.path.dirname(os.path.abspath(__file__))
+    os.system(f'explorer "{directory}"')
 
 
 
-def scrape(kurss, grupa):
+def scrape(kurss, grupa, progress_var, window):
     chrome_options = Options()
     chrome_options.add_argument('--headless')
 
-    # Initialize the Chrome WebDriver with the configured options
     driver = webdriver.Chrome(options=chrome_options)
-
-    # locale.setlocale(locale.LC_TIME, "latvian")
-    # driver = webdriver.Chrome()
     driver.get("https://nodarbibas.rtu.lv/")
-    ##time.sleep(600)
-
-    ##/html/body/div[2]/div/div[1]/div/div/div/div[2]/div/button/div/div/div
-
-    ##1.KURSS 2. GRUPA IT
 
     darbiba1 = driver.find_element(By.XPATH, '/html/body/div[2]/div/div[1]/div/div/div/div[2]/div/button/div/div/div')
-    darbiba1.click()    ## studiju programma
-    time.sleep(1)
+    darbiba1.click()
+    time.sleep(0.5)
 
-    ##/html/body/div[2]/div/div[1]/div/div/div/div[2]/div/div/div[2]/ul/li[11]/a
+    darbiba2 = driver.find_element(By.XPATH,
+                                   '/html/body/div[2]/div/div[1]/div/div/div/div[2]/div/div/div[2]/ul/li[11]/a')
+    darbiba2.click()
+    time.sleep(0.5)
 
-    darbiba2 = driver.find_element(By.XPATH,'/html/body/div[2]/div/div[1]/div/div/div/div[2]/div/div/div[2]/ul/li[11]/a') ##1.k
-    #darbiba2 = driver.find_element(By.XPATH, kurss)
-    darbiba2.click()        ## kurss
-    time.sleep(1)
-
-    ##/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[1]/select/option[2]
-
-    #darbiba3 = driver.find_element(By.XPATH,'/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[1]/select/option[2]') ##1.k
     darbiba3 = driver.find_element(By.XPATH, kurss)
-    darbiba3.click() ## grupa
-    time.sleep(1)
+    darbiba3.click()
+    time.sleep(0.5)
 
-    ##/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[3]
-
-    #darbiba4 = driver.find_element(By.XPATH,'/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[3]') ## 2. grupa
     darbiba4 = driver.find_element(By.XPATH, grupa)
     darbiba4.click()
-    time.sleep(1)
+    time.sleep(0.5)
 
-    ##/html/body/div[2]/div/div[2]/div/div/div[1]/div[2]/div[1]/div[3]/div/button[1]/span
-
-    darbiba5 = driver.find_element(By.XPATH,
-                                   '/html/body/div[2]/div/div[2]/div/div/div[1]/div[2]/div[1]/div[3]/div/button[1]/span')
+    darbiba5 = driver.find_element(By.XPATH,'/html/body/div[2]/div/div[2]/div/div/div[1]/div[2]/div[1]/div[3]/div/button[1]/span')
     click_count = 4
     for i in range(click_count):
         darbiba5.click()
-    time.sleep(2)
+    time.sleep(0.5)
 
     events = []
     events.clear()
 
-    iter = 0
-
     def get_events():
-        global iter
+        nonlocal events
 
         try:
-
             day_events_elements = driver.find_elements(By.CLASS_NAME, 'fc-daygrid-day-events')
 
             for day_element in day_events_elements:
-
                 event_harness_elements = day_element.find_elements(By.CLASS_NAME, 'fc-daygrid-event-harness')
 
                 if event_harness_elements:
@@ -98,25 +71,22 @@ def scrape(kurss, grupa):
                         })
 
         finally:
-            #iter += 1
             print("lapa clicked")
-
-            ##driver.quit()
 
         return events
 
-    time.sleep(1)
+    time.sleep(0.5)
 
-    darbiba6 = driver.find_element(By.XPATH,
-                                   '/html/body/div[2]/div/div[2]/div/div/div[1]/div[2]/div[1]/div[3]/div/button[5]/span')
+    darbiba6 = driver.find_element(By.XPATH,'/html/body/div[2]/div/div[2]/div/div/div[1]/div[2]/div[1]/div[3]/div/button[5]/span')
     click_count = 5
     for i in range(click_count):
         events.extend(get_events())
         darbiba6.click()
+        progress_var.set((i + 1) * 100 // click_count)
+        window.update()
 
     saraksts = []
 
-    # Duplikātu pārbaude
     for duplikats in events:
         if duplikats not in saraksts:
             saraksts.append(duplikats)
@@ -165,7 +135,6 @@ def scrape(kurss, grupa):
     cal = Calendar()
     cal.add('prodid', '-//Kalendars//mxm.dk//')
     cal.add('version', '1.0')
-    ##locale.setlocale(locale.LC_TIME, "latvian")
 
     month_mapping = {
         'janvāris': 'January',
@@ -194,12 +163,10 @@ def scrape(kurss, grupa):
         date_str = replace_month_names(a['date'])
         time_str_start, time_str_end = a['time'].split(' - ')
 
-        # Parse the date and time
         date_obj = datetime.datetime.strptime(date_str, '%Y. gada %d. %B')
         time_start_obj = datetime.datetime.strptime(time_str_start, '%H:%M')
         time_end_obj = datetime.datetime.strptime(time_str_end, '%H:%M')
 
-        # Format the date and time in "dd/mm/yyyy" format
         short_date_format = date_obj.strftime('%d/%m/%Y')
         short_time_format_start = time_start_obj.strftime('%H:%M')
         short_time_format_end = time_end_obj.strftime('%H:%M')
@@ -221,7 +188,7 @@ def scrape(kurss, grupa):
 
         cal.add_component(event)
 
-    with open('my.ics', 'wb') as my_file:
+    with open('kalendars.ics', 'wb') as my_file:
         my_file.write(cal.to_ical())
 
     print("ICS created")
@@ -229,17 +196,13 @@ def scrape(kurss, grupa):
 
     driver.close()
 
-window = tk.Tk()  # init tkinter window
-window.title("RTU IT studiju programmas kalendārs")
+    return 'my.ics'
 
-#window.minsize(1190,800) #tkinter loga fiksetais izmers
-#window.maxsize(1190,800)
 
 def update_options(*args):
     global drop1
     selected_kurss = click.get()
 
-    # Define the available options for drop1 based on the selected kurss
     if selected_kurss == "1. kurss":
         options_grupa = ["1. grupa", "2. grupa", "3. grupa", "4. grupa", "5. grupa", "6. grupa"]
     elif selected_kurss == "2. kurss":
@@ -247,70 +210,40 @@ def update_options(*args):
     elif selected_kurss == "3. kurss":
         options_grupa = ["1. grupa", "2. grupa", "3. grupa", "4. grupa"]
     else:
-        options_grupa = []  # Default to an empty list if no match
+        options_grupa = []
 
-    # Destroy the existing drop1 widget
     if drop1:
         drop1.destroy()
 
-    # Create a new drop1 widget with updated options
     click1.set("Izvēlies grupu")
     drop1 = OptionMenu(window, click1, *options_grupa)
     drop1.config(width=12)
-    #drop1.place(x=140, y=5)
-    drop1.pack( side = "left")
+    #drop1.pack(side="left")
+    drop1.grid(column=1, row=0)
 
-
-
-
-options_kurss = ["1. kurss",
-        "2. kurss",
-        "3. kurss",
-    ]
-click = tk.StringVar()
-click.set("Izvēlies kursu")
-
-drop = OptionMenu(window, click, *options_kurss) # dropdownlists
-drop.pack( side = "left")
-
-click.trace('w', update_options)
-
-options_grupa = ["1. grupa", "2. grupa", "3. grupa", "4. grupa", "5. grupa", "6. grupa"]
-click1 = tk.StringVar()
-click1.set("Izvēlies grupu")
-
-
-
-
-
-
-options_grupa = ["1. grupa",
-        "2. grupa",
-        "3. grupa",
-        "4. grupa",
-        "5. grupa",
-        "6. grupa"
-    ]
-
-click1 = tk.StringVar()
-click1.set("Izvēlies grupu")
-
-drop1 = OptionMenu(window, click1, *options_grupa)
-drop1.pack( side = "left")
 
 def setKurss():
-    kurss = click.get()
-    return kurss
+    return click.get()
+
 
 def setGrupa():
-    grupa = click1.get()
-    return grupa
+    return click1.get()
 
-kurss = setKurss()
-grupa = setGrupa()
+
 def callScrape():
+    for widget in window.winfo_children():
+        if isinstance(widget, tk.Label) and widget.cget("text") == "Atvērt kalendāra atrašanās vietu":
+            widget.destroy()
+
+
     dropdownKurss = setKurss()
     dropdownGrupa = setGrupa()
+
+    progress_var = tk.IntVar()
+    progress_var.set(0)
+
+    progress = ttk.Progressbar(window, variable=progress_var, length=200, mode='determinate')
+    progress.grid(row=2, column=0, columnspan=5, pady=10)
 
     if dropdownKurss == "1. kurss":
         kurss = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[1]/select/option[2]'
@@ -349,15 +282,46 @@ def callScrape():
         elif dropdownGrupa == "4. grupa":
             grupa = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[5]'
 
-    scrape(kurss, grupa)
+    ics_filename = scrape(kurss, grupa, progress_var, window)
 
-kalendarsButton = Button(window, text="Kalendārs", width=20, command=callScrape)
-#kalendarsButton = Button(window, text="Kalendārs", width=20, command=lambda:scrape(setKurss(), setGrupa()))
+    progress_var.set(100)
+    window.update()
 
-kalendarsButton.pack( side = "right")
+    if ics_filename:
+        for widget in window.winfo_children():
+            if isinstance(widget, tk.Label) and widget.cget("text") == "Atvērt kalendāra atrašanās vietu":
+                widget.destroy()
+
+        link_label = tk.Label(window, text="Atvērt kalendāra atrašanās vietu", cursor="hand2", fg="blue")
+        link_label.grid(row=3, column=0, columnspan=5, pady=5)
+        link_label.bind("<Button-1>", lambda e: open_file_explorer())
 
 
+window = tk.Tk()
+window.title("RTU IT studiju programmas kalendārs")
+window.iconphoto(False, tk.PhotoImage(file='download.png'))
+
+window.minsize(352,32) #tkinter loga fiksetais izmers
+window.maxsize(352,136)
+
+options_kurss = ["1. kurss", "2. kurss", "3. kurss"]
+click = tk.StringVar()
+click.set("Izvēlies kursu")
+drop = OptionMenu(window, click, *options_kurss)
+#drop.pack(side="left")
+drop.grid(column=0, row=0)
+click.trace('w', update_options)
+
+options_grupa = ["1. grupa", "2. grupa", "3. grupa", "4. grupa", "5. grupa", "6. grupa"]
+click1 = tk.StringVar()
+click1.set("Izvēlies grupu")
+drop1 = OptionMenu(window, click1, *options_grupa)
+#drop1.pack(side="left")
+drop1.grid(column=1, row=0)
+
+kalendarsButton = Button(window, text="Kalendārs", width=15, command=callScrape)
+#kalendarsButton.pack(side="right")
+kalendarsButton.grid(column=3, row=0)
 
 
 window.mainloop()
-
