@@ -17,82 +17,9 @@ import datetime
 import locale
 from selenium.webdriver.chrome.options import Options
 
-window = tk.Tk()  # init tkinter window
-window.title("RTU IT studiju programmas kalendārs")
-
-#window.minsize(1190,800) #tkinter loga fiksetais izmers
-#window.maxsize(1190,800)
-
-def update_options(*args):
-    global drop1
-    selected_kurss = click.get()
-
-    # Define the available options for drop1 based on the selected kurss
-    if selected_kurss == "1. kurss":
-        options_grupa = ["1. grupa", "2. grupa", "3. grupa", "4. grupa", "5. grupa", "6. grupa"]
-    elif selected_kurss == "2. kurss":
-        options_grupa = ["1. grupa", "2. grupa", "3. grupa", "4. grupa", "5. grupa"]
-    elif selected_kurss == "3. kurss":
-        options_grupa = ["1. grupa", "2. grupa", "3. grupa", "4. grupa"]
-    else:
-        options_grupa = []  # Default to an empty list if no match
-
-    # Destroy the existing drop1 widget
-    if drop1:
-        drop1.destroy()
-
-    # Create a new drop1 widget with updated options
-    click1.set("Izvēlies grupu")
-    drop1 = OptionMenu(window, click1, *options_grupa)
-    drop1.config(width=12)
-    #drop1.place(x=140, y=5)
-    drop1.pack( side = "left")
 
 
-
-
-options_kurss = ["1. kurss",
-        "2. kurss",
-        "3. kurss",
-    ]
-click = tk.StringVar()
-click.set("Izvēlies kursu")
-
-drop = OptionMenu(window, click, *options_kurss) # dropdownlists
-drop.pack( side = "left")
-
-click.trace('w', update_options)
-
-options_grupa = ["1. grupa", "2. grupa", "3. grupa", "4. grupa", "5. grupa", "6. grupa"]
-click1 = tk.StringVar()
-click1.set("Izvēlies grupu")
-
-
-
-
-
-
-options_grupa = ["1. grupa",
-        "2. grupa",
-        "3. grupa",
-        "4. grupa",
-        "5. grupa",
-        "6. grupa"
-    ]
-
-click1 = tk.StringVar()
-click1.set("Izvēlies grupu")
-
-drop1 = OptionMenu(window, click1, *options_grupa)
-drop1.pack( side = "left")
-
-
-setKPbutton = Button(window, text="Kalendārs", width=20)
-setKPbutton.pack( side = "right")
-
-window.mainloop()
-
-def scrape():
+def scrape(kurss, grupa):
     chrome_options = Options()
     chrome_options.add_argument('--headless')
 
@@ -106,28 +33,30 @@ def scrape():
 
     ##/html/body/div[2]/div/div[1]/div/div/div/div[2]/div/button/div/div/div
 
+    ##1.KURSS 2. GRUPA IT
+
     darbiba1 = driver.find_element(By.XPATH, '/html/body/div[2]/div/div[1]/div/div/div/div[2]/div/button/div/div/div')
-    darbiba1.click()
+    darbiba1.click()    ## studiju programma
     time.sleep(1)
 
     ##/html/body/div[2]/div/div[1]/div/div/div/div[2]/div/div/div[2]/ul/li[11]/a
 
-    darbiba2 = driver.find_element(By.XPATH,
-                                   '/html/body/div[2]/div/div[1]/div/div/div/div[2]/div/div/div[2]/ul/li[11]/a')
-    darbiba2.click()
+    darbiba2 = driver.find_element(By.XPATH,'/html/body/div[2]/div/div[1]/div/div/div/div[2]/div/div/div[2]/ul/li[11]/a') ##1.k
+    #darbiba2 = driver.find_element(By.XPATH, kurss)
+    darbiba2.click()        ## kurss
     time.sleep(1)
 
     ##/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[1]/select/option[2]
 
-    darbiba3 = driver.find_element(By.XPATH,
-                                   '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[1]/select/option[2]')
-    darbiba3.click()
+    #darbiba3 = driver.find_element(By.XPATH,'/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[1]/select/option[2]') ##1.k
+    darbiba3 = driver.find_element(By.XPATH, kurss)
+    darbiba3.click() ## grupa
     time.sleep(1)
 
     ##/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[3]
 
-    darbiba4 = driver.find_element(By.XPATH,
-                                   '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[3]')
+    #darbiba4 = driver.find_element(By.XPATH,'/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[3]') ## 2. grupa
+    darbiba4 = driver.find_element(By.XPATH, grupa)
     darbiba4.click()
     time.sleep(1)
 
@@ -169,8 +98,8 @@ def scrape():
                         })
 
         finally:
-            iter += 1
-            print(iter)
+            #iter += 1
+            print("lapa clicked")
 
             ##driver.quit()
 
@@ -295,8 +224,140 @@ def scrape():
     with open('my.ics', 'wb') as my_file:
         my_file.write(cal.to_ical())
 
+    print("ICS created")
     time.sleep(2)
 
     driver.close()
 
+window = tk.Tk()  # init tkinter window
+window.title("RTU IT studiju programmas kalendārs")
+
+#window.minsize(1190,800) #tkinter loga fiksetais izmers
+#window.maxsize(1190,800)
+
+def update_options(*args):
+    global drop1
+    selected_kurss = click.get()
+
+    # Define the available options for drop1 based on the selected kurss
+    if selected_kurss == "1. kurss":
+        options_grupa = ["1. grupa", "2. grupa", "3. grupa", "4. grupa", "5. grupa", "6. grupa"]
+    elif selected_kurss == "2. kurss":
+        options_grupa = ["1. grupa", "2. grupa", "3. grupa", "4. grupa", "5. grupa"]
+    elif selected_kurss == "3. kurss":
+        options_grupa = ["1. grupa", "2. grupa", "3. grupa", "4. grupa"]
+    else:
+        options_grupa = []  # Default to an empty list if no match
+
+    # Destroy the existing drop1 widget
+    if drop1:
+        drop1.destroy()
+
+    # Create a new drop1 widget with updated options
+    click1.set("Izvēlies grupu")
+    drop1 = OptionMenu(window, click1, *options_grupa)
+    drop1.config(width=12)
+    #drop1.place(x=140, y=5)
+    drop1.pack( side = "left")
+
+
+
+
+options_kurss = ["1. kurss",
+        "2. kurss",
+        "3. kurss",
+    ]
+click = tk.StringVar()
+click.set("Izvēlies kursu")
+
+drop = OptionMenu(window, click, *options_kurss) # dropdownlists
+drop.pack( side = "left")
+
+click.trace('w', update_options)
+
+options_grupa = ["1. grupa", "2. grupa", "3. grupa", "4. grupa", "5. grupa", "6. grupa"]
+click1 = tk.StringVar()
+click1.set("Izvēlies grupu")
+
+
+
+
+
+
+options_grupa = ["1. grupa",
+        "2. grupa",
+        "3. grupa",
+        "4. grupa",
+        "5. grupa",
+        "6. grupa"
+    ]
+
+click1 = tk.StringVar()
+click1.set("Izvēlies grupu")
+
+drop1 = OptionMenu(window, click1, *options_grupa)
+drop1.pack( side = "left")
+
+def setKurss():
+    kurss = click.get()
+    return kurss
+
+def setGrupa():
+    grupa = click1.get()
+    return grupa
+
+kurss = setKurss()
+grupa = setGrupa()
+def callScrape():
+    dropdownKurss = setKurss()
+    dropdownGrupa = setGrupa()
+
+    if dropdownKurss == "1. kurss":
+        kurss = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[1]/select/option[2]'
+        if dropdownGrupa == "1. grupa":
+            grupa = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[2]'
+        elif dropdownGrupa == "2. grupa":
+            grupa = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[3]'
+        elif dropdownGrupa == "3. grupa":
+            grupa = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[4]'
+        elif dropdownGrupa == "4. grupa":
+            grupa = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[5]'
+        elif dropdownGrupa == "5. grupa":
+            grupa = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[6]'
+        elif dropdownGrupa == "6. grupa":
+            grupa = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[7]'
+    elif dropdownKurss == "2. kurss":
+        kurss = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[1]/select/option[3]'
+        if dropdownGrupa == "1. grupa":
+            grupa = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[2]'
+        elif dropdownGrupa == "2. grupa":
+            grupa = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[3]'
+        elif dropdownGrupa == "3. grupa":
+            grupa = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[4]'
+        elif dropdownGrupa == "4. grupa":
+            grupa = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[5]'
+        elif dropdownGrupa == "5. grupa":
+            grupa = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[6]'
+    elif dropdownKurss == "3. kurss":
+        kurss = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[1]/select/option[4]'
+        if dropdownGrupa == "1. grupa":
+            grupa = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[2]'
+        elif dropdownGrupa == "2. grupa":
+            grupa = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[3]'
+        elif dropdownGrupa == "3. grupa":
+            grupa = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[4]'
+        elif dropdownGrupa == "4. grupa":
+            grupa = '/html/body/div[2]/div/div[1]/div/div/div/div[3]/div[1]/div[2]/select/option[5]'
+
+    scrape(kurss, grupa)
+
+kalendarsButton = Button(window, text="Kalendārs", width=20, command=callScrape)
+#kalendarsButton = Button(window, text="Kalendārs", width=20, command=lambda:scrape(setKurss(), setGrupa()))
+
+kalendarsButton.pack( side = "right")
+
+
+
+
+window.mainloop()
 
