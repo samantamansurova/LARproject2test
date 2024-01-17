@@ -410,6 +410,3 @@ Izveidota *kalendarsButton* poga, kura izsauc *callScrape* funkciju. Definēts p
         os.system(f'explorer "{directory}"')
 
 Funkcija atver mapi, kurā atrodas kalendāra fails.
-
-
-greet("John")
